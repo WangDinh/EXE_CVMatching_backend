@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+import os
 from langchain_openai import ChatOpenAI
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
@@ -24,8 +26,6 @@ from langchain_core.runnables import ConfigurableFieldSpec
 from langchain_core.output_parsers import JsonOutputParser
 parser_res = JsonOutputParser()
 
-import os
-from dotenv import load_dotenv
 
 # load the environment variables
 load_dotenv()
@@ -34,13 +34,13 @@ load_dotenv()
 os.environ['GOOGLE_API_KEY'] = os.getenv('GOOGLE_API_KEY')
 os.environ['QDRANT_API_KEY'] = os.getenv('QDRANT_API_KEY')
 os.environ['QDRANT_URL'] = os.getenv('QDRANT_URL')
-os.environ['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY')
+# os.environ['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY')
 os.environ['TAVILY_API_KEY'] = os.getenv('TAVILY_API_KEY')
 
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
 QDRANT_API_KEY = os.environ.get("QDRANT_API_KEY")
 QDRANT_URL = os.environ.get("QDRANT_URL")
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+# OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 TAVILY_API_KEY = os.environ.get("TAVILY_API_KEY")
 
 llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
@@ -54,7 +54,7 @@ client = qdrant_client.QdrantClient(
 
 doc_store = Qdrant(
     client=client,
-    collection_name="langchain_knowledge_base", 
+    collection_name="langchain_knowledge_base",
     embeddings=embeddings,
 )
 
@@ -69,13 +69,17 @@ retriever_tool = create_retriever_tool(
 search = TavilySearchResults(max_results=3)
 
 # Response schema
+
+
 class Quiz_Gen_Response(BaseModel):
     """Parsing quiz. Output format is JSON only."""
     output: str = Field(
         description='The generated quiz in JSON format: {"count":10,"data":[{"id":int,"question":str,"choices":["A.","B.","C.","D."],"explanation":str,"answer":str,"level":str[Fresher,Junior,Senior],"domain":str}]}'
-)
+    )
 
 # Custom parsing logic
+
+
 def parse(output):
     # If no function was invoked, return to user
     if "function_call" not in output.additional_kwargs:
@@ -95,11 +99,14 @@ def parse(output):
             tool=name, tool_input=inputs, log="", message_log=[output]
         )
 
+
 prompt = ChatPromptTemplate.from_messages(
     [
-        SystemMessagePromptTemplate(prompt=PromptTemplate(input_variables=[], template='You are a helpful assistant')),
+        SystemMessagePromptTemplate(prompt=PromptTemplate(
+            input_variables=[], template='You are a helpful assistant')),
         MessagesPlaceholder(variable_name='chat_history'),
-        HumanMessagePromptTemplate(prompt=PromptTemplate(input_variables=['input'], template='{input}')),
+        HumanMessagePromptTemplate(prompt=PromptTemplate(
+            input_variables=['input'], template='{input}')),
         MessagesPlaceholder(variable_name='agent_scratchpad')
     ]
 )
@@ -121,10 +128,13 @@ agent = (
 agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 
 store = {}
+
+
 def get_session_history(user_id: str, conversation_id: str) -> BaseChatMessageHistory:
     if (user_id, conversation_id) not in store:
         store[(user_id, conversation_id)] = ChatMessageHistory()
     return store[(user_id, conversation_id)]
+
 
 with_message_history = RunnableWithMessageHistory(
     agent_executor,
@@ -151,20 +161,24 @@ with_message_history = RunnableWithMessageHistory(
     ],
 )
 
+
 def is_valid_json(json_string):
     valid_json = json.loads(json_string)
     return valid_json
+
 
 def generate_question(jobtext: str):
     store.clear()
     keyword_res = with_message_history.invoke(
         {"input": f"What are the technical keywords mentioned in this job description and level of JD need (Fresher, Junior, Senior): {jobtext}"},
-        config={"configurable": {"user_id": "quangdinh", "conversation_id": "abc123"}},
+        config={"configurable": {
+            "user_id": "quangdinh", "conversation_id": "abc123"}},
     )
     response = with_message_history.invoke(
         {"input": f"""YOUR TASK is CREATE a 10 QUESTIONS based on the keywords technical skills below:
          {keyword_res["output"]}"""},
-        config={"configurable": {"user_id": "quangdinh", "conversation_id": "abc123"}},
+        config={"configurable": {
+            "user_id": "quangdinh", "conversation_id": "abc123"}},
     )
     llm_res_json = parser_res.parse(response["output"])
     print(type(response["output"]))
