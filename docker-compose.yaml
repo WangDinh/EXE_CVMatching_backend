@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  app: 
+    build: .
+    container_name: "cv_container"
+    ports:
+      - 7860:7860
+    volumes:
+      - .:/app
+    env_file:
+      - .env
