@@ -4,7 +4,7 @@ FROM python:3.10.13-slim-bookworm
 ENV CLOUD_HOME=/home/user \
     PATH=/home/user/.local/bin:$PATH
 
-RUN apt-get update && apt-get install libgl1 libglib2.0-0 libsm6 libxrender1 libxext6 poppler-utils -y
+RUN apt-get update && apt-get install libgl1 libglib2.0-0 libsm6 libxrender1 libxext6 poppler-utils gcc -y
 RUN apt-get update && apt-get install libleptonica-dev tesseract-ocr libtesseract-dev python3-pil tesseract-ocr-eng tesseract-ocr-script-latn -y
 
 # Setup new user named user with UID 1000
