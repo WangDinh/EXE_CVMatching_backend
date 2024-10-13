@@ -174,3 +174,4 @@ wrapt==1.16.0
 yarl==1.9.4
 pi_heif==0.18.0
 unstructured.pytesseract==0.3.13
+tesseract-ocr==0.0.1

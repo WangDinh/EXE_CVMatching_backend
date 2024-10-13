@@ -5,6 +5,7 @@ ENV CLOUD_HOME=/home/user \
     PATH=/home/user/.local/bin:$PATH
 
 RUN apt-get update && apt-get install libgl1 libglib2.0-0 libsm6 libxrender1 libxext6 poppler-utils -y
+RUN apt-get update && apt-get install libleptonica-dev tesseract-ocr tesseract-ocr-dev libtesseract-dev python3-pil tesseract-ocr-eng tesseract-ocr-script-latn -y
 
 # Setup new user named user with UID 1000
 RUN useradd -m -u 1000 user
