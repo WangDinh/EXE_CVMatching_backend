@@ -92,7 +92,7 @@ msgpack==1.0.8
 multidict==6.0.5
 mypy-extensions==1.0.0
 networkx==3.2.1
-nltk==3.8.1
+nltk==3.9.1
 numpy==1.26.4
 omegaconf==2.3.0
 onnx==1.15.0
